@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,python,linux,windows,jupyternotebooks,django
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,python,linux,windows,jupyternotebooks,django
 
+# Ignore ALL data (raw/processed) and models
+data/
+models/
+
 ### Django ###
 *.log
 *.pot
