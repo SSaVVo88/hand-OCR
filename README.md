@@ -15,15 +15,3 @@ source .venv/bin/activate
 python -m venv .venv
 .venv\Scripts\activate
 ```
-### Install the project 
-```bash
-pip install -e .  # Installs YOUR CODE + dependencies
-```
-### Verify installation
-```bash
-pip list | grep ocr-model  # Should show: ocr-model 0.1.0 (editable)
-```
-### Run the model
-```bash
-python -m ocr_model.train
-```
