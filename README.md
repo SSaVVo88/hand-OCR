@@ -1,7 +1,7 @@
 # Handwriting OCR Model
 ## 🚀 Quick Start  
 ```bash
-git clone https://github.com/SSaVVo88/hand-OCR.git
+git clone git@github.com:SSaVVo88/hand-OCR.git
 cd hand-OCR
 ```
 ## Create and activate virutal enviroment 
