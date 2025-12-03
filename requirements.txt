@@ -9,3 +9,5 @@ tokenizers==0.22.1
 pandas
 pillow
 opencv-python
+fastapi
+uvicorn
