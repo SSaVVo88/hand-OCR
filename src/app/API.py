@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import webbrowser
@@ -28,7 +28,7 @@ app.add_middleware(
 
 # handler /predict
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+async def predict(file: UploadFile = File(), author: str = Form()):
     # Sprawdzanie typu pliku
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image.")
@@ -41,11 +41,13 @@ async def predict(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid image file.")
 
     width, height = img.size
+    imiona = {"Zuzanna":"Zuzanna Heldt", "Konrad":"Konrad Hennig", "Emilia":"Emilia Kreft", "Piotr":"Piotr Przypaśniak", "Przemek":"Przemysław Sawoniuk"}
     return {
         "filename": file.filename,
         "size": {
             "width": width,
-            "height": height}}
+            "height": height},
+        "author": imiona[author]}
 
 
 # Automatyczne uruchamianie index.html

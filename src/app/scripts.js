@@ -1,5 +1,6 @@
 const form = document.getElementById("predictForm");
 const input = document.getElementById("fileInput");
+const author = document.getElementById("author");
 const preview = document.getElementById("img_preview");
 const result = document.getElementById("result");
 
@@ -27,9 +28,20 @@ input.addEventListener("change", () => {
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    if (input.files.length !== 1) {
+        result.textContent = "Wybierz plik.";
+        return;
+    }
+    if (!author.value) {
+        result.textContent = "Wybierz kategorię.";
+        return;
+    }
+
     const formData = new FormData();
     formData.append("file", input.files[0]);
+    formData.append("author", author.value);
     input.value = "";
+    author.value = "";
 
     try {
         // Wysłanie pliku do Pythona
@@ -38,7 +50,7 @@ form.addEventListener("submit", async (e) => {
         // Przetwarzanie odpowiedzi
         const data = await response.json();
         // Poniższe do zmiany jak zacznie działać model
-        result.textContent = `Nazwa pliku: ${data.filename}\nSzerokość: ${data.size.width}px\nWysokość: ${data.size.height}px`;
+        result.textContent = `Nazwa pliku: ${data.filename}\nSzerokość: ${data.size.width}px\nWysokość: ${data.size.height}px\nAutor: ${data.author}`;
       } catch (err) {
         result.textContent = err.message;
       }
