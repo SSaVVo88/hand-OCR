@@ -1,10 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
 import webbrowser
 import threading
 import time
+
+# Poniższe tylko do otwierania pliku png (możliwe że w przyszłości niepotrzebne)
+from PIL import Image
+import io
 
 
 # Żeby uruchomić serwer wpisujemy w katalogu głównym (hand-OCR):
@@ -23,17 +26,26 @@ app.add_middleware(
     allow_headers=["*"],)
 
 
-# Klasa dla /predict
-class PredictRequest(BaseModel):
-    text: str
-
-
 # handler /predict
 @app.post("/predict")
-def predict(request: PredictRequest):
-    # W przyszłości tutaj prawdziwy predict z modelu
-    reversed_text = request.text[::-1]
-    return {"text_out": reversed_text}
+async def predict(file: UploadFile = File(...)):
+    # Sprawdzanie typu pliku
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image.")
+
+    # Odczytanie pliku - w celach testowych
+    img = await file.read()
+    try:
+        img = Image.open(io.BytesIO(img))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid image file.")
+
+    width, height = img.size
+    return {
+        "filename": file.filename,
+        "size": {
+            "width": width,
+            "height": height}}
 
 
 # Automatyczne uruchamianie index.html
