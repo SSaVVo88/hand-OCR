@@ -9,13 +9,15 @@
   <h2>Test GUI</h2>
 
   <form id="predictForm">
-    <label for="text">Tekst:</label>
-    <input id="text" name="text" type="text" placeholder="wpisz tekst..." required />
+    <input id="fileInput" type="file" accept="image/*" style="border:1px solid black;" required/>
     <button type="submit">Wyślij</button>
   </form>
 
+  <h3>Podgląd:</h3>
+  <img id="img_preview" src="" style="max-width:300px; max-height:300px; display:none;">
+
   <h3>Wynik:</h3>
-  <div id="result">-</div>
+  <div id="result" style="white-space: pre-wrap;"></div>
   </center>
 
   <script src="scripts.js"></script>
