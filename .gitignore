@@ -28,6 +28,7 @@ media
 *.so
 
 # Distribution / packaging
+.github
 .Python
 build/
 develop-eggs/
