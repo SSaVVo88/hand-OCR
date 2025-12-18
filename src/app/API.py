@@ -1,9 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-import webbrowser
-import threading
-import time
 
 # Poniższe tylko do otwierania pliku png (możliwe że w przyszłości niepotrzebne)
 from PIL import Image
@@ -11,7 +7,8 @@ import io
 
 
 # Żeby uruchomić serwer wpisujemy w katalogu głównym (hand-OCR):
-# uvicorn src.app.API:app
+# uvicorn src.app.API:app --host 0.0.0.0 --port 8000
+# Następnie otwieramy plik 'index.html' normalnie w przeglądarce
 
 
 # Tworzenie aplikacji
@@ -48,21 +45,3 @@ async def predict(file: UploadFile = File(), author: str = Form()):
             "width": width,
             "height": height},
         "author": imiona[author]}
-
-
-# Automatyczne uruchamianie index.html
-@app.get("/")
-def serve_index():
-    return FileResponse("src/app/index.html")
-
-@app.get("/scripts.js")
-def serve_js():
-    return FileResponse("src/app/scripts.js")
-
-def open_browser():
-    time.sleep(1)
-    webbrowser.open("http://127.0.0.1:8000")
-
-@app.on_event("startup")
-def startup_event():
-    threading.Thread(target=open_browser).start()

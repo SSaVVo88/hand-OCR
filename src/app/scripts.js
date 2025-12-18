@@ -45,7 +45,7 @@ form.addEventListener("submit", async (e) => {
 
     try {
         // Wysłanie pliku do Pythona
-        const response = await fetch("/predict", {method: "POST", body: formData});
+        const response = await fetch("http://127.0.0.1:8000/predict", {method: "POST", body: formData});
 
         // Przetwarzanie odpowiedzi
         const data = await response.json();
