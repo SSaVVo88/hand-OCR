@@ -9,13 +9,26 @@
   <h2>Test GUI</h2>
 
   <form id="predictForm">
-    <label for="text">Tekst:</label>
-    <input id="text" name="text" type="text" placeholder="wpisz tekst..." required />
+    <input id="fileInput" type="file" accept="image/*" style="border:1px solid black;" required/>
+    <br><br>
+    <label for="author">Wybierz autora:</label>
+    <select id="author" name="category" required>
+      <option value="">-- wybierz --</option>
+      <option value="Zuzanna">Zuzanna</option>
+      <option value="Konrad">Konrad</option>
+      <option value="Emilia">Emilia</option>
+      <option value="Piotr">Piotr</option>
+      <option value="Przemek">Przemek</option>
+    </select>
+    <br><br><br>
     <button type="submit">Wyślij</button>
   </form>
 
+  <h3>Podgląd:</h3>
+  <img id="img_preview" src="" style="max-width:300px; max-height:300px; display:none;">
+
   <h3>Wynik:</h3>
-  <div id="result">-</div>
+  <div id="result" style="white-space: pre-wrap;"></div>
   </center>
 
   <script src="scripts.js"></script>

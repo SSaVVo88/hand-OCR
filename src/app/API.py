@@ -1,14 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-import webbrowser
-import threading
-import time
+
+# Poniższe tylko do otwierania pliku png (możliwe że w przyszłości niepotrzebne)
+from PIL import Image
+import io
 
 
 # Żeby uruchomić serwer wpisujemy w katalogu głównym (hand-OCR):
-# uvicorn src.app.API:app
+# uvicorn src.app.API:app --host 0.0.0.0 --port 8000
+# Następnie otwieramy plik 'index.html' normalnie w przeglądarce
 
 
 # Tworzenie aplikacji
@@ -23,32 +23,25 @@ app.add_middleware(
     allow_headers=["*"],)
 
 
-# Klasa dla /predict
-class PredictRequest(BaseModel):
-    text: str
-
-
 # handler /predict
 @app.post("/predict")
-def predict(request: PredictRequest):
-    # W przyszłości tutaj prawdziwy predict z modelu
-    reversed_text = request.text[::-1]
-    return {"text_out": reversed_text}
+async def predict(file: UploadFile = File(), author: str = Form()):
+    # Sprawdzanie typu pliku
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image.")
 
+    # Odczytanie pliku - w celach testowych
+    img = await file.read()
+    try:
+        img = Image.open(io.BytesIO(img))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid image file.")
 
-# Automatyczne uruchamianie index.html
-@app.get("/")
-def serve_index():
-    return FileResponse("src/app/index.html")
-
-@app.get("/scripts.js")
-def serve_js():
-    return FileResponse("src/app/scripts.js")
-
-def open_browser():
-    time.sleep(1)
-    webbrowser.open("http://127.0.0.1:8000")
-
-@app.on_event("startup")
-def startup_event():
-    threading.Thread(target=open_browser).start()
+    width, height = img.size
+    imiona = {"Zuzanna":"Zuzanna Heldt", "Konrad":"Konrad Hennig", "Emilia":"Emilia Kreft", "Piotr":"Piotr Przypaśniak", "Przemek":"Przemysław Sawoniuk"}
+    return {
+        "filename": file.filename,
+        "size": {
+            "width": width,
+            "height": height},
+        "author": imiona[author]}
