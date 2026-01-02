@@ -91,7 +91,7 @@ async function checkServer() {
     } catch {
         serverOK = false;
         statusBox.style.background = "red";
-        statusBox.textContent = "Offline - uruchom backend";
+        statusBox.textContent = "Offline - uruchom serwer";
         statusOverlay.style.display = "flex";
     }
 }
