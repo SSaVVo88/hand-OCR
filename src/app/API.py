@@ -45,3 +45,8 @@ async def predict(file: UploadFile = File(), author: str = Form()):
             "width": width,
             "height": height},
         "author": imiona[author]}
+
+# Sprawdzanie statusu
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
