@@ -77,9 +77,9 @@ form.addEventListener("submit", async (e) => {
         }
 
         result.textContent =
-            `Nazwa pliku: ${data.filename}
-Szerokość: ${data.size.width}px
-Wysokość: ${data.size.height}px`;
+            `Filename: ${data.filename}
+Image width: ${data.size.width}px
+Image height: ${data.size.height}px`;
 
     } catch (err) {
         if (err.name === "AbortError") {
