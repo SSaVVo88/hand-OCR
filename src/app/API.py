@@ -1,5 +1,6 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 # Poniższe tylko do otwierania pliku png (możliwe że w przyszłości niepotrzebne)
 from PIL import Image
@@ -22,31 +23,61 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],)
 
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+# Ogólny handler błędów
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "internal_server_error",
+            "message": "Unexpected error occurred."
+        },
+    )
+
 
 # handler /predict
 @app.post("/predict")
-async def predict(file: UploadFile = File(), author: str = Form()):
+async def predict(file: UploadFile = File()):
     # Sprawdzanie typu pliku
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image.")
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="The file must be an image.")
 
-    # Odczytanie pliku - w celach testowych
-    img = await file.read()
+    # Odczytanie pliku
     try:
-        img = Image.open(io.BytesIO(img))
+        content = await file.read()
     except Exception:
-        raise HTTPException(status_code=400, detail="Invalid image file.")
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to read the file.")
+
+    # Sprawdzanie rozmiaru
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="Uploaded file is too big (max 5MB).")
+
+    # sprawdzanie pliku
+    try:
+        img = Image.open(io.BytesIO(content))
+        img.verify()  # sprawdzenie integralności
+        img = Image.open(io.BytesIO(content))  # ponowne otwarcie
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Corrupted file.")
 
     width, height = img.size
-    imiona = {"Zuzanna":"Zuzanna Heldt", "Konrad":"Konrad Hennig", "Emilia":"Emilia Kreft", "Piotr":"Piotr Przypaśniak", "Przemek":"Przemysław Sawoniuk"}
     return {
         "filename": file.filename,
         "size": {
             "width": width,
-            "height": height},
-        "author": imiona[author]}
+            "height": height}}
 
-# Sprawdzanie statusu
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}

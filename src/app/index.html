@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="pl">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>hand-OCR</title>
+  <title>Hand-OCR</title>
 </head>
 <body>
   <div id="serverStatus" style="
@@ -14,31 +14,24 @@
     background: gray;
     color: white;
     font-size: 14px;">
-    Sprawdzanie serwera...
+    Checking connection with server...
   </div>
   <center>
-  <h2>Test GUI</h2>
+  <h2>Hand-OCR GUI</h2>
 
+    <br>
   <form id="predictForm">
-    <input id="fileInput" type="file" accept="image/*" style="border:1px solid black;" required/>
-    <br><br>
-    <label for="author">Wybierz autora:</label>
-    <select id="author" name="category" required>
-      <option value="">-- wybierz --</option>
-      <option value="Zuzanna">Zuzanna</option>
-      <option value="Konrad">Konrad</option>
-      <option value="Emilia">Emilia</option>
-      <option value="Piotr">Piotr</option>
-      <option value="Przemek">Przemek</option>
-    </select>
-    <br><br><br>
-    <button type="submit">Wyślij</button>
+    <input id="fileInput" type="file" accept="image/*" style="border:1px solid black;" hidden/>
+    <button id="uploadButton" type="button">➕ Upload image</button>
+    <br>
+
+    <h3>Preview:</h3>
+    <img id="img_preview" src="" style="max-width:300px; max-height:300px; display:none;"><br>
+
+    <button id="submitButton" type="submit" style="display:none">Submit</button>
   </form>
 
-  <h3>Podgląd:</h3>
-  <img id="img_preview" src="" style="max-width:300px; max-height:300px; display:none;">
-
-  <h3>Wynik:</h3>
+  <h3>Result:</h3>
   <div id="result" style="white-space: pre-wrap;"></div>
   </center>
 
@@ -54,8 +47,8 @@
   justify-content:center;
   text-align:center;
   z-index:9999;">
-  Brak połączenia z backendem.<br>
-  Upewnij się, że serwer jest uruchomiony.
+  Unable to connect to the server.<br>
+  Make sure the server is running.
 </div>
   <script src="scripts.js"></script>
 </body>

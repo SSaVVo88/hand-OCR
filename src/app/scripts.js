@@ -1,99 +1,117 @@
 const form = document.getElementById("predictForm");
 const input = document.getElementById("fileInput");
-const author = document.getElementById("author");
+const uploadButton = document.getElementById("uploadButton");
 const preview = document.getElementById("img_preview");
+const submitButton = document.getElementById("submitButton");
 const result = document.getElementById("result");
 const statusBox = document.getElementById("serverStatus");
 const statusOverlay = document.getElementById("serverOverlay");
 
 let serverOK = false;
-let lastPing = null;
 
 const HEALTH_URL = "http://127.0.0.1:8000/health";
 const PREDICT_URL = "http://127.0.0.1:8000/predict";
+const REQUEST_TIMEOUT = 8000; // ms
+
+
+// Button
+uploadButton.addEventListener("click", () => {
+    input.click();
+});
 
 
 // Miniaturka
 input.addEventListener("change", () => {
     result.textContent = "";
-    if (input.files.length === 1){
-        const file = input.files[0];
+    if (input.files.length === 1) {
+        const file = fileInput.files[0];
         const reader = new FileReader();
-
-        reader.onload = (e) => {
+        reader.onload = e => {
             preview.src = e.target.result;
-            preview.style.display = "block"};
-
+            preview.style.display = "block";
+        };
         reader.readAsDataURL(file);
-    } else{
-        preview.src = "";
+        submitButton.style.display = "inline-block";
+    } else {
         preview.style.display = "none";
+        submitButton.style.display = "none";
     }
 });
 
 
-// Handler submit
+// Submit
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Jeśli serwer nie działa
     if (!serverOK) {
-        result.textContent = "Backend offline - uruchom serwer.";
+        result.textContent = "Server is offline.";
         return;
     }
 
     if (input.files.length !== 1) {
-        result.textContent = "Wybierz plik.";
-        return;
-    }
-    if (!author.value) {
-        result.textContent = "Wybierz kategorię.";
+        result.textContent = "Upload one file.";
         return;
     }
 
     const formData = new FormData();
     formData.append("file", input.files[0]);
-    formData.append("author", author.value);
-    input.value = "";
-    author.value = "";
+
+    form.querySelector("button").disabled = true;
+    result.textContent = "Processing...";
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
     try {
-        // Wysłanie pliku do Pythona
-        const response = await fetch(PREDICT_URL, {method: "POST", body: formData});
+        const response = await fetch(PREDICT_URL, {
+            method: "POST",
+            body: formData,
+            signal: controller.signal
+        });
 
-        // Przetwarzanie odpowiedzi
         const data = await response.json();
-        // Poniższe do zmiany jak zacznie działać model
-        result.textContent = `Nazwa pliku: ${data.filename}\nSzerokość: ${data.size.width}px\nWysokość: ${data.size.height}px\nAutor: ${data.author}`;
-      } catch (err) {
-        result.textContent = err.message;
-      }
+
+        if (!response.ok) {
+            result.textContent = data.detail || data.message || "Server error.";
+            return;
+        }
+
+        result.textContent =
+            `Filename: ${data.filename}
+Image width: ${data.size.width}px
+Image height: ${data.size.height}px`;
+
+    } catch (err) {
+        if (err.name === "AbortError") {
+            result.textContent = "Server timeout.";
+        } else {
+            result.textContent = "Connection error.";
+        }
+    } finally {
+        clearTimeout(timeout);
+        form.querySelector("button").disabled = false;
+        input.value = "";
+        submitButton.style.display = "none";
+    }
 });
 
-
-// Sprawdzanie statusu
+// Status
 async function checkServer() {
-    // Ping
-    const t0 = performance.now();
     try {
-        const res = await fetch(HEALTH_URL, {cache: "no-store"});
+        const res = await fetch(HEALTH_URL, { cache: "no-store" });
         if (!res.ok) throw new Error();
 
-        // Ping
-        const t1 = performance.now();
-        lastPing = Math.round(t1 - t0);
         serverOK = true;
-
         statusBox.style.background = "green";
-        statusBox.textContent = `Online (${lastPing} ms)`;
+        statusBox.textContent = "Online";
         statusOverlay.style.display = "none";
-
     } catch {
         serverOK = false;
         statusBox.style.background = "red";
-        statusBox.textContent = "Offline - uruchom serwer";
+        statusBox.textContent = "Offline";
         statusOverlay.style.display = "flex";
     }
 }
+
 checkServer();
 setInterval(checkServer, 2000);
