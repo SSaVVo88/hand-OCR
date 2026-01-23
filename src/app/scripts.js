@@ -76,10 +76,13 @@ form.addEventListener("submit", async (e) => {
             return;
         }
 
-        result.textContent =
-            `Filename: ${data.filename}
-Image width: ${data.size.width}px
-Image height: ${data.size.height}px`;
+        result.innerHTML =
+            `<strong>📄 Filename:</strong> ${data.filename}<br>
+<strong>📐 Image size:</strong> ${data.size.width} × ${data.size.height}px<br><br>
+<strong>🔤 Recognized text:</strong><br>
+<div style="background: #f5f5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #4CAF50; margin-top: 8px; font-family: monospace; font-size: 16px;">
+${data.text || "(no text recognized)"}
+</div>`;
 
     } catch (err) {
         if (err.name === "AbortError") {
